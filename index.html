@@ -255,7 +255,7 @@ $(document).ready(function () {
         const profitR = lastPrice * profitL;
         $("#profit-amount").html(profitR.toFixed(4));
         $("#data-time").html(new Date(lastDate).toUTCString());
-        let taHTML = `
+        let taHTML = '
 <!-- TradingView Widget BEGIN -->
 <div class="tradingview-widget-container d-none">
   <div class="tradingview-widget-container__widget"></div>
@@ -274,7 +274,7 @@ $(document).ready(function () {
   </script>
 </div>
 <!-- TradingView Widget END -->
-`;
+';
         taHTML = taHTML.replace(/:ticker:/g, "BINANCE:"+ticker);
         $('.taAnalysis').html(taHTML)
         
