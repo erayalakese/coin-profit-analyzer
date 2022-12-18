@@ -255,24 +255,7 @@ $(document).ready(function () {
         const profitR = lastPrice * profitL;
         $("#profit-amount").html(profitR.toFixed(4));
         $("#data-time").html(new Date(lastDate).toUTCString());
-        let taHTML = '<!-- TradingView Widget BEGIN -->
-<div class="tradingview-widget-container d-none">
-  <div class="tradingview-widget-container__widget"></div>
-  <div class="tradingview-widget-copyright"><a href="https://www.tradingview.com/symbols/:ticker:/technicals/" rel="noopener" target="_blank"><span class="blue-text">Analysis by TradingView</span></a></div>
-  <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js" async>
-  {
-  "interval": "1m",
-  "width": 425,
-  "isTransparent": true,
-  "height": 450,
-  "symbol": ":ticker:",
-  "showIntervalTabs": true,
-  "locale": "en",
-  "colorTheme": "dark"
-}
-  </script>
-</div>
-<!-- TradingView Widget END -->';
+        let taHTML = "<div class='tradingview-widget-container d-none'><div class='tradingview-widget-container__widget'></div><div class='tradingview-widget-copyright'><a href='https://www.tradingview.com/symbols/:ticker:/technicals/' rel='noopener' target='_blank'><span class='blue-text'>Analysis by TradingView</span></a></div><script type='text/javascript' src='https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js' async>{'interval': '1m', 'width': 425, 'isTransparent': true, 'height': 450, 'symbol': ':ticker:', 'showIntervalTabs': true, 'locale': 'en', 'colorTheme': 'dark'}</script></div>";
         taHTML = taHTML.replace(/:ticker:/g, "BINANCE:"+ticker);
         $('.taAnalysis').html(taHTML)
         
