@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ChartJS Line Chart</title>
+  <!-- Include the latest version of ChartJS -->
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+  <style>
+  body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  font-family: Arial, sans-serif;
+}
+
+.chart-container {
+  width: 100%;
+  height: 80%;
+}
+
+.chart-placeholder {
+
+  width: 100%;
+  height: 100%;
+  background: url(placeholder.jpg) no-repeat center center;
+  background-size: cover;
+  filter: blur(5px);
+  z-index: 1;
+}
+
+.chart {
+
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+}
+form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 80%;
+  margin: 20px auto;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f5f5f5;
+}
+
+form label {
+  margin-bottom: 10px;
+}
+
+form input[type="text"],
+form input[type="date"] {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+form input[type="submit"] {
+  width: 100%;
+  background-color: #4caf50;
+  color: white;
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+form input[type="submit"]:hover {
+  background-color: #45a049;
+}
+
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="row">
+      <!-- Chart container -->
+      <div class="chart-container d-block">
+        <!-- Placeholder image -->
+        <div class="chart-placeholder"></div>
+        <!-- Chart canvas -->
+        <div class="chart" id="chart"></div>
+      </div>
+    </div>
+    <div class="row">
+      <!-- Form -->
+      <form id="form" class="col">
+        <label for="ticker">Ticker:</label>
+        <input type="text" id="ticker" name="ticker" value="YFIUSDT" required>
+        <label for="buy-date">Buy Date:</label>
+        <input type="text" id="buy-date" name="buy-date" value="12.17.2022 08:41:20" required>
+        <label for="buy-rate">Buy Rate:</label>
+        <input type="text" id="buy-rate" name="buy-rate" value="5732" required>
+        <label for="buy-amount">Buy Amount:</label>
+        <input type="text" id="buy-amount" name="buy-amount" value="0.00191" required>
+        <input type="submit" value="Submit">
+      </form>
+    
+      <div class="col">
+        <h3>Current Profit</h3>
+        <ul>
+          <li id="profit-percent">1.41%</li>
+          <li id="profit-amount">1.41USDT</li>
+        </ul>
+        <h3>Holding Time</h3>
+        <ul>
+          <li id="holding">4 hours</li>
+        </ul>
+        <div class="taAnalysis"></div>
+        
+
+        <span class="text-muted">Data based on the price at <i id="data-time"></i></span>
+      </div>
+    </div>
+  </div>
+  <script type="text/javascript">
+  // https://write.corbpie.com/apex-charts-temperature-line-chart-example/
+$(document).ready(function () {
+  $("form").submit(function (event) {
+    event.preventDefault(); // prevent the form from submitting
+
+    let ticker = $("#ticker").val();
+    let buyDate = $("#buy-date").val();
+    let date = new Date(buyDate);
+    buyDate = date.getTime();
+    const buyRate = parseFloat($("#buy-rate").val());
+    const buyAmount = parseFloat($("#buy-amount").val());
+    // code to get BTCUSDT price history goes here
+    $.ajax({
+      url: "https://api.binance.com/api/v3/klines",
+      method: "GET",
+      data: {
+        symbol: ticker,
+        interval: "5m", // get price history for 1 day intervals
+        limit: 1152 // get the last 4 days of price history
+      },
+      success: function (response) {
+        const responsePrices = response.map((r) => {
+          return r[2];
+        });
+        const times = response.map((r) => {
+          return r[6];
+        });
+        console.log("times", times);
+        console.log("buyDate", buyDate);
+        console.log("buyRate", buyRate);
+        console.log(
+          "buyRate",
+          (100 * buyRate) /
+            Math.max(...responsePrices.map((r) => parseFloat(r)))
+        );
+
+        // https://apexcharts.com/javascript-chart-demos/area-charts/datetime-x-axis/#
+        var options = {
+          
+          grid: {
+            borderColor: "#6D6D6D"
+          },
+          chart: {
+            type: "line"
+          },
+          tooltip: {
+            x: {
+              format: "dd/MM HH:mm"
+            },
+            y: {
+              formatter: function (
+                value,
+                { series, seriesIndex, dataPointIndex, w }
+              ) {
+                return ((value * 100) / buyRate - 100).toFixed(4);
+              }
+            }
+          },
+          series: [
+            {
+              name: "sales",
+              data: responsePrices
+            }
+          ],
+          annotations: {
+            points: [
+              {
+                x: buyDate,
+                y: buyRate,
+                marker: {
+                  size: 8
+                },
+                label: {
+                  borderColor: "#FF4560",
+                  text: "BOUGHT"
+                }
+              }
+            ],
+            yaxis: [
+              {
+                y: buyRate + (buyRate * 1) / 100,
+                borderColor: "darkgreen",
+                label: {
+                  borderColor: "darkgreen",
+                  style: {
+                    color: "#fff",
+                    background: "darkgreen"
+                  },
+                  text: "1% tshold"
+                }
+              },
+              {
+                y: buyRate + (buyRate * 2) / 100,
+                borderColor: "darkgreen",
+                label: {
+                  borderColor: "darkgreen",
+                  style: {
+                    color: "#fff",
+                    background: "darkgreen"
+                  },
+                  text: "2% tshold"
+                }
+              }
+            ]
+          },
+          xaxis: {
+            type: "datetime",
+            categories: times,
+            labels: {
+              datetimeFormatter: {
+                year: "yyyy",
+                month: "MMM 'yy",
+                day: "dd MMM HH:mm",
+                hour: "HH:mm"
+              }
+            }
+          }
+        };
+
+        var chart = new ApexCharts(document.querySelector("#chart"), options);
+
+        chart.render();
+
+        const lastPrice = responsePrices[responsePrices.length - 1];
+        const lastDate = times[responsePrices.length - 1];
+        const profitCalculated = (100 * lastPrice) / buyRate;
+        const profitNet = profitCalculated - 100;
+        $("#profit-percent").html(profitNet.toFixed(4));
+        const profitL = buyAmount + (buyAmount * profitNet) / 100;
+        const profitR = lastPrice * profitL;
+        $("#profit-amount").html(profitR.toFixed(4));
+        $("#data-time").html(new Date(lastDate).toUTCString());
+        let taHTML = `
+<!-- TradingView Widget BEGIN -->
+<div class="tradingview-widget-container d-none">
+  <div class="tradingview-widget-container__widget"></div>
+  <div class="tradingview-widget-copyright"><a href="https://www.tradingview.com/symbols/:ticker:/technicals/" rel="noopener" target="_blank"><span class="blue-text">Analysis by TradingView</span></a></div>
+  <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js" async>
+  {
+  "interval": "1m",
+  "width": 425,
+  "isTransparent": true,
+  "height": 450,
+  "symbol": ":ticker:",
+  "showIntervalTabs": true,
+  "locale": "en",
+  "colorTheme": "dark"
+}
+  </script>
+</div>
+<!-- TradingView Widget END -->
+`
+        taHTML = taHTML.replace(/:ticker:/g, "BINANCE:"+ticker);
+        $('.taAnalysis').html(taHTML)
+        
+        $(".tradingview-widget-container").removeClass('d-none');
+
+        // process the response to get the price history
+      },
+      error: function (error) {
+        // handle the error
+        console.log(error);
+      }
+    });
+  });
+});
+
+  </script>
+</body>
+
+</html>
